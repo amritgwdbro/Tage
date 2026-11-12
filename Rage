@@ -1,0 +1,412 @@
+-- [[ ⚡ ULTIMATE RAGE SPAMMER (PURE BLACK TOGGLE) ⚡ ]] --
+-- Place in StarterPlayer > StarterPlayerScripts
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextChatService = game:GetService("TextChatService")
+local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
+local player = Players.LocalPlayer
+
+-- ===== RAGE PRESET CATEGORIES =====
+local presetsAt = {
+	"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ [TARGET] TMxK RAGE WAVE PARALLEL NOVA RAGE DIMENSION",
+	"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ [TARGET] TMxK RAGE BLEEDING FRAUD DIMENSION HYPER VOID POWER"
+}
+
+local presetsSlash = {
+	"[/|||===/||||||===/||||||===/||||||===/||||||===/||||||===/|/|||===/||||||===/||||||===/||||||===/|||///] [TARGET] NOVA RAGE SPELL NOVA VOID WORM DIMENSION",
+	"[/|||===/||||||===/||||||===/||||||===/||||||===/||||||===/||/|||===/||||||===/||||||===/||||||===/||||||===] [TARGET] RAGE VOID WORM DIMENSION DARK POWER SPELL"
+}
+
+local presetsPlus = {
+	"[+++---+++---+++---+++---+++---+++---++++++---+++---+++---+++---+++---+++---+++] [TARGET] RAGE POWER FRAUD SPELL FUN FACT WAVE GODZILLA",
+	"[+++---+++---+++---+++---+++---+++---++++++---+++---+++---+++---+++---+++---++][TARGET] RAGE BLEEDING SPELL NOVA FRAUD PARALLEL DARK POWER"
+}
+
+-- ===== UI SETUP =====
+local gui = Instance.new("ScreenGui")
+gui.Name = "RageSpammerGui"
+gui.ResetOnSpawn = false
+gui.DisplayOrder = 999
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local function corner(obj, r)
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, r or 8)
+	c.Parent = obj
+end
+
+-- ===== NEW STYLISH THEMES =====
+local currentTheme = 1 
+local themeColors = {
+	{main = Color3.fromRGB(12, 12, 16), accent = Color3.fromRGB(255, 40, 90), btn = Color3.fromRGB(60, 15, 35)},
+	{main = Color3.fromRGB(12, 14, 20), accent = Color3.fromRGB(50, 130, 255), btn = Color3.fromRGB(15, 45, 80)},
+	{main = Color3.fromRGB(16, 12, 20), accent = Color3.fromRGB(170, 50, 255), btn = Color3.fromRGB(50, 15, 75)}
+}
+
+local uiStrokesToUpdate = {}
+local accentStrokesToUpdate = {}
+local bgFramesToUpdate = {}
+local actionButtonsToUpdate = {}
+
+local function applyTheme()
+	local t = themeColors[currentTheme]
+	for _, f in ipairs(bgFramesToUpdate) do f.BackgroundColor3 = t.main end
+	for _, s in ipairs(uiStrokesToUpdate) do s.Color = t.accent end
+	for _, s in ipairs(accentStrokesToUpdate) do s.Color = t.accent end
+	for _, b in ipairs(actionButtonsToUpdate) do b.BackgroundColor3 = t.btn end
+end
+
+local function makeBox(parent, placeholder, y, text)
+	local b = Instance.new("TextBox")
+	b.Size = UDim2.new(1, -20, 0, 32)
+	b.Position = UDim2.new(0, 10, 0, y)
+	b.PlaceholderText = placeholder
+	b.Text = text or ""
+	b.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+	b.TextColor3 = Color3.new(1, 1, 1)
+	b.PlaceholderColor3 = Color3.fromRGB(140, 140, 160)
+	b.Font = Enum.Font.Gotham
+	b.TextSize = 13
+	b.ClearTextOnFocus = false
+	b.Parent = parent
+	corner(b, 6)
+	
+	table.insert(bgFramesToUpdate, b)
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = themeColors[currentTheme].accent
+	stroke.Thickness = 1.2
+	stroke.Parent = b
+	table.insert(uiStrokesToUpdate, stroke)
+	return b
+end
+
+local function makeButton(parent, label, pos, size, color)
+	local b = Instance.new("TextButton")
+	b.Size = size
+	b.Position = pos
+	b.Text = label
+	b.BackgroundColor3 = color
+	b.TextColor3 = Color3.new(1, 1, 1)
+	b.Font = Enum.Font.GothamBold
+	b.TextSize = 12
+	b.Parent = parent
+	corner(b, 6)
+	
+	table.insert(actionButtonsToUpdate, b)
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = themeColors[currentTheme].accent
+	stroke.Thickness = 1.2
+	stroke.Parent = b
+	table.insert(uiStrokesToUpdate, stroke)
+	return b
+end
+
+-- ================= PURE BLACK TOGGLE BUTTON =================
+local ToggleBtn = Instance.new("TextButton", gui)
+ToggleBtn.Name = "RageToggle"
+ToggleBtn.Size = UDim2.new(0, 48, 0, 48)
+ToggleBtn.Position = UDim2.new(0, 15, 1, -65)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Pure Black
+ToggleBtn.Text = "⚡"
+ToggleBtn.TextSize = 22
+ToggleBtn.Active = true
+ToggleBtn.Draggable = false
+ToggleBtn.Visible = false
+corner(ToggleBtn, 24)
+
+local T_Stroke = Instance.new("UIStroke", ToggleBtn)
+T_Stroke.Color = themeColors[currentTheme].accent
+T_Stroke.Thickness = 1.5
+table.insert(uiStrokesToUpdate, T_Stroke)
+
+-- ===== MAIN MENU =====
+local menu = Instance.new("Frame")
+menu.Size = UDim2.new(0, 360, 0, 370)
+menu.AnchorPoint = Vector2.new(0.5, 0.5)
+menu.Position = UDim2.new(0.5, 0, 0.5, 0)
+menu.BackgroundColor3 = themeColors[currentTheme].main
+menu.Visible = false
+menu.Active = true
+menu.Draggable = true
+menu.Parent = gui
+corner(menu, 14)
+table.insert(bgFramesToUpdate, menu)
+
+local M_Stroke = Instance.new("UIStroke", menu)
+M_Stroke.Color = themeColors[currentTheme].accent
+M_Stroke.Thickness = 1.8
+table.insert(uiStrokesToUpdate, M_Stroke)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 40)
+title.BackgroundTransparency = 1
+title.Text = "⚡ RAGE SPAMMER v1.1"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.Parent = menu
+
+local targetBox = makeBox(menu, "Target Name (replaces [TARGET])", 45, "TMX")
+local delayBox = makeBox(menu, "Delay (0.1s to 10s)", 87, "0.7")
+
+-- Status Label
+local status = Instance.new("TextLabel")
+status.Size = UDim2.new(1, -20, 0, 20)
+status.Position = UDim2.new(0, 10, 0, 127)
+status.BackgroundTransparency = 1
+status.Text = "Status: Stopped"
+status.TextColor3 = Color3.fromRGB(180, 180, 200)
+status.Font = Enum.Font.Gotham
+status.TextSize = 12
+status.TextXAlignment = Enum.TextXAlignment.Left
+status.Parent = menu
+
+-- Preset Selection Buttons
+local activePresetType = 1
+local cycleEnabled = false
+
+local btnP1 = makeButton(menu, "Preset: @@@", UDim2.new(0, 10, 0, 155), UDim2.new(0, 108, 0, 34), Color3.fromRGB(40, 10, 25))
+local btnP2 = makeButton(menu, "Preset: ///", UDim2.new(0, 126, 0, 155), UDim2.new(0, 108, 0, 34), Color3.fromRGB(18, 18, 24))
+local btnP3 = makeButton(menu, "Preset: +++", UDim2.new(0, 242, 0, 155), UDim2.new(0, 108, 0, 34), Color3.fromRGB(18, 18, 24))
+
+local function updatePresetButtons()
+	local t = themeColors[currentTheme]
+	btnP1.BackgroundColor3 = (activePresetType == 1 and not cycleEnabled) and t.btn or Color3.fromRGB(18, 18, 24)
+	btnP2.BackgroundColor3 = (activePresetType == 2 and not cycleEnabled) and t.btn or Color3.fromRGB(18, 18, 24)
+	btnP3.BackgroundColor3 = (activePresetType == 3 and not cycleEnabled) and t.btn or Color3.fromRGB(18, 18, 24)
+end
+
+btnP1.MouseButton1Click:Connect(function() cycleEnabled = false activePresetType = 1 updatePresetButtons() end)
+btnP2.MouseButton1Click:Connect(function() cycleEnabled = false activePresetType = 2 updatePresetButtons() end)
+btnP3.MouseButton1Click:Connect(function() cycleEnabled = false activePresetType = 3 updatePresetButtons() end)
+
+-- Cycle Button
+local cycleBtn = makeButton(menu, "Cycle Presets: OFF", UDim2.new(0, 10, 0, 198), UDim2.new(0, 340, 0, 34), Color3.fromRGB(18, 18, 24))
+cycleBtn.MouseButton1Click:Connect(function()
+	cycleEnabled = not cycleEnabled
+	local t = themeColors[currentTheme]
+	if cycleEnabled then
+		cycleBtn.Text = "Cycle Presets: ON (All 3)"
+		cycleBtn.BackgroundColor3 = t.btn
+	else
+		cycleBtn.Text = "Cycle Presets: OFF"
+		cycleBtn.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+	end
+	updatePresetButtons()
+end)
+
+-- Theme Switcher Button
+local themeBtn = makeButton(menu, "Theme: Neon Pink ⚡", UDim2.new(0, 10, 0, 240), UDim2.new(0, 340, 0, 34), Color3.fromRGB(18, 18, 24))
+themeBtn.MouseButton1Click:Connect(function()
+	currentTheme = currentTheme + 1
+	if currentTheme > 3 then currentTheme = 1 end
+	
+	if currentTheme == 1 then themeBtn.Text = "Theme: Neon Pink ⚡"
+	elseif currentTheme == 2 then themeBtn.Text = "Theme: Cyber Blue 🌐"
+	elseif currentTheme == 3 then themeBtn.Text = "Theme: Royal Purple 🔮" end
+	
+	applyTheme()
+	updatePresetButtons()
+end)
+
+-- Start & Stop Controls
+local startBtn = makeButton(menu, "START", UDim2.new(0, 10, 0, 285), UDim2.new(0.5, -15, 0, 38), Color3.fromRGB(50, 15, 35))
+local stopBtn = makeButton(menu, "STOP", UDim2.new(0.5, 5, 0, 285), UDim2.new(0.5, -15, 0, 38), Color3.fromRGB(80, 20, 30))
+
+-- Info footer
+local infoLbl = Instance.new("TextLabel", menu)
+infoLbl.Size = UDim2.new(1, -20, 0, 25)
+infoLbl.Position = UDim2.new(0, 10, 0, 332)
+infoLbl.BackgroundTransparency = 1
+infoLbl.Text = "Delay supported: 0.1s to 10s (Default: 0.7s)"
+infoLbl.TextColor3 = Color3.fromRGB(140, 140, 160)
+infoLbl.TextSize = 10
+infoLbl.TextWrapped = true
+infoLbl.Font = Enum.Font.Gotham
+
+-- ===== CHAT FUNCTION =====
+local function getChannel()
+	local channels = TextChatService:WaitForChild("TextChannels", 5)
+	return channels and channels:FindFirstChild("RBXGeneral")
+end
+
+local function sendMessage(msg)
+	local channel = getChannel()
+	if channel then
+		channel:SendAsync(msg)
+	else
+		pcall(function()
+			ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(msg, "All")
+		end)
+	end
+end
+
+local function buildMessage(presetIndex, currentType)
+	local chosenList = presetsAt
+	if currentType == 2 then chosenList = presetsSlash
+	elseif currentType == 3 then chosenList = presetsPlus end
+	
+	local idx = ((presetIndex - 1) % #chosenList) + 1
+	local body = chosenList[idx]
+
+	local tName = targetBox.Text ~= "" and targetBox.Text or "PLAYER"
+	body = body:gsub("%[TARGET%]", tName)
+
+	return body
+end
+
+-- ===== START & STOP LOGIC =====
+local running = false
+
+startBtn.MouseButton1Click:Connect(function()
+	if running then return end
+	running = true
+	status.Text = "Status: Running..."
+	status.TextColor3 = Color3.fromRGB(80, 255, 120)
+
+	task.spawn(function()
+		local i = 1
+		local cycleType = 1
+		while running do
+			local typeToUse = activePresetType
+			if cycleEnabled then
+				typeToUse = cycleType
+				cycleType = cycleType + 1
+				if cycleType > 3 then cycleType = 1 end
+			end
+
+			local msg = buildMessage(i, typeToUse)
+			sendMessage(msg)
+			
+			i = i + 1
+
+			local userDelay = tonumber(delayBox.Text) or 0.7
+			local d = math.clamp(userDelay, 0.1, 10.0)
+			
+			local waited = 0
+			while running and waited < d do
+				task.wait(0.05)
+				waited += 0.05
+			end
+		end
+	end)
+end)
+
+stopBtn.MouseButton1Click:Connect(function()
+	running = false
+	status.Text = "Status: Stopped"
+	status.TextColor3 = Color3.fromRGB(255, 80, 80)
+end)
+
+-- ===== PHONK MUSIC SETUP =====
+local phonkMusic = Instance.new("Sound")
+phonkMusic.Name = "IntroPhonk"
+phonkMusic.SoundId = "rbxassetid://1848354536"
+phonkMusic.Volume = 1
+phonkMusic.Looped = false
+phonkMusic.Parent = SoundService
+
+-- ===== INTRO POP-UP =====
+local popup = Instance.new("Frame")
+popup.Size = UDim2.new(0, 400, 0, 140)
+popup.AnchorPoint = Vector2.new(0.5, 0.5)
+popup.Position = UDim2.new(0.5, 0, 0.5, 0)
+popup.BackgroundColor3 = Color3.fromRGB(12, 12, 16)
+popup.Parent = gui
+corner(popup, 14)
+table.insert(bgFramesToUpdate, popup)
+
+local pStroke = Instance.new("UIStroke", popup)
+pStroke.Color = themeColors[currentTheme].accent
+pStroke.Thickness = 1.8
+table.insert(uiStrokesToUpdate, pStroke)
+
+local popupLabel = Instance.new("TextLabel")
+popupLabel.Size = UDim2.new(1, -30, 1, -20)
+popupLabel.Position = UDim2.new(0, 15, 0, 10)
+popupLabel.BackgroundTransparency = 1
+popupLabel.Text = "Rage Spammer v1.1 initializing...\n\n(Loading core...)"
+popupLabel.TextWrapped = true
+popupLabel.TextColor3 = Color3.new(1, 1, 1)
+popupLabel.Font = Enum.Font.GothamBold
+popupLabel.TextSize = 14
+popupLabel.TextXAlignment = Enum.TextXAlignment.Center
+popupLabel.TextYAlignment = Enum.TextYAlignment.Center
+popupLabel.Parent = popup
+
+-- Vertical Side Loading Bar
+local vBarBg = Instance.new("Frame")
+vBarBg.Size = UDim2.new(0, 8, 1, -20)
+vBarBg.Position = UDim2.new(1, -15, 0, 10)
+vBarBg.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+vBarBg.Parent = popup
+corner(vBarBg, 4)
+
+local vBarFill = Instance.new("Frame")
+vBarFill.Size = UDim2.new(1, 0, 0, 0)
+vBarFill.Position = UDim2.new(0, 0, 1, 0)
+vBarFill.AnchorPoint = Vector2.new(0, 1)
+vBarFill.BackgroundColor3 = themeColors[currentTheme].accent
+vBarFill.Parent = vBarBg
+corner(vBarFill, 4)
+table.insert(accentStrokesToUpdate, vBarFill)
+
+local loaderStarted = false
+local function startLoader()
+	if loaderStarted then return end
+	loaderStarted = true
+	
+	popupLabel.Text = "Loading Rage Core & Playing Phonk..."
+	phonkMusic:Play()
+	
+	local tw = TweenService:Create(vBarFill, TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 1, 0)})
+	tw:Play()
+	tw.Completed:Connect(function()
+		phonkMusic:Stop()
+		
+		local fade = TweenService:Create(popup, TweenInfo.new(0.2), {Size = UDim2.new(0,0,0,0), Transparency = 1})
+		fade:Play()
+		fade.Completed:Connect(function()
+			popup:Destroy()
+			ToggleBtn.Visible = true
+			
+			task.spawn(function()
+				task.wait(0.5)
+				local loadMsg = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n[Rage Spammer v1.1 Loaded] Destroy h8ters[ready h8ters]\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+				sendMessage(loadMsg)
+			end)
+		end)
+	end)
+end
+
+task.spawn(function()
+	task.wait(0.8)
+	startLoader()
+end)
+
+-- ===== TOGGLE BUTTON LOGIC =====
+local isOpen = false
+
+ToggleBtn.MouseButton1Click:Connect(function()
+	isOpen = not isOpen
+	if isOpen then
+		menu.Visible = true
+		menu.Size = UDim2.new(0, 0, 0, 0)
+		
+		local tw = TweenService:Create(menu, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			Size = UDim2.new(0, 360, 0, 370)
+		})
+		tw:Play()
+	else
+		local tw = TweenService:Create(menu, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+			Size = UDim2.new(0, 0, 0, 0)
+		})
+		tw:Play()
+		tw.Completed:Connect(function()
+			menu.Visible = false
+		end)
+	end
+end)
+               
